@@ -1,3 +1,4 @@
+const { where } = require("sequelize");
 const Aluno = require("../models/aluno.model");
 const bcrypt =require('bcryptjs')
 class AlunoController {
@@ -14,12 +15,16 @@ class AlunoController {
       await Aluno.create({ nome, matricula, email, senha: senhaCriptografada });
       res.status(200).json({ msg: 'Aluno criado com sucesso' });
     } catch (error) {
-        res.status(500).json({msg: 'Erro do servidor. Tente novamente mais tarde!'})
+        res.status(500).json({msg: 'Erro do servidor. Tente novamente mais tarde!', erro: error.message})
     }
   }
   static async perfil(req, res) {
     try {
-      const aluno = await Aluno.findAll();
+      const { matricula } = req.usuario
+      const aluno = await Aluno.findOne({
+        where: {matricula},
+        attributes: ['nome','email', 'matricula']
+      });
       if (!aluno) {
         return res.status(401).json({ msg: "Não existe aluno cadastrado!" });
       }
